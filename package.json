@@ -1,0 +1,16 @@
+{
+  "name": "dc-msg-bot",
+  "version": "1.0.0",
+  "description": "A Discord bot for automated messaging",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "random": "^3.0.6"
+  },
+  "devDependencies": {},
+  "author": "",
+  "license": "ISC"
+}
