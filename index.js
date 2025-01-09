@@ -51,7 +51,6 @@ const headers = {
   accept: "*/*",
   "accept-language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
   "cache-control": "no-cache",
-  authorization: "",
   "content-type": "application/json",
   "user-agent":
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
@@ -111,9 +110,12 @@ async function chat() {
         console.error(error?.response?.status, "失败");
       }
 
-      // delay 30 - 50s
+      // channel delay 30 - 50s
       await sleep(random.int(30000, 50000));
     }
+
+    // account delay 5 - 10s
+    await sleep(random.int(5000, 10000));
   }
 }
 
@@ -124,8 +126,8 @@ async function chat() {
       console.log("start:", time++, new Date().toLocaleString());
       await chat();
       // 305-310s 再发送下一次消息
-      const sleeptime = random.int(305000, 310000);
-      await sleep(sleeptime);
+      const sleep = random.int(305000, 310000);
+      await sleep(sleep);
     } catch (error) {
       console.error(error);
     }
