@@ -2,6 +2,18 @@
 
 discord 自动发消息脚本
 
+## 启动项目
+
+node(v16+)
+
+```js
+npm install
+```
+
+```js
+npm run start
+```
+
 ## 频道列表
 
 将想要发自动送消息的频道 id 加入到上方 chanelList 里面
