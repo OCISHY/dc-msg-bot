@@ -1,117 +1,94 @@
 const axios = require("axios");
 const random = require("random");
 const sleep = require("util").promisify(setTimeout);
-
-// 自己编辑要发送的消息内容
-const contextList = [
-  "aiming to enhance the Web3 ecosystem.",
-  "how to get faucet?",
-  "how to get faucet???",
-  "Im in",
-  "good project",
-  "have a good day",
-  "GM",
-  "of course bro",
-  "how's going",
-  "so do i",
-  "yeah",
-  "same to me",
-  "soon soon",
-  "cool",
-  "so far",
-  "too hard to get level 3",
-  "Just keep chasing here",
-  "really??",
-  "Keep chatting, and we’ll make it.",
-  "Maybe not",
-  "what this?",
-  "why?",
-  "not bad",
-  "Just keep talking here",
-  "keep talking guys",
-  "Just keep chatting here",
-  "100k is boring, right?",
-  "keep moving, and keep chat",
-  "yes",
-  "Almost there; I can feel the rewards!",
-  "Which task I have to do, to get level 3 role?",
-  "Which task I have to do, to get level 3 role? Plz help me",
-  "How to get level 3 role? ",
-  "How to get level 3 role? Plz help me",
-  "no not yet",
-];
-
-// 频道id
-const chanelList = [""];
-
-// token list
-const authorizationList = [""];
+const { accounts, channels, messages, userAgentData } = require("./config");
+const { HttpsProxyAgent } = require("https-proxy-agent");
 
 const headers = {
   accept: "*/*",
-  "accept-language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
   "cache-control": "no-cache",
+  dnt: "1",
+  origin: "https://discord.com",
+  pragma: "no-cache",
+  priority: "u=1, i",
   "content-type": "application/json",
-  "user-agent":
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+  "sec-fetch-dest": "empty",
+  "sec-fetch-mode": "cors",
+  "sec-fetch-site": "same-origin",
+  "sec-ch-ua-mobile": "?0",
 };
 
-function genContext() {
-  const text = contextList[Math.floor(Math.random() * contextList.length)];
-  return text;
-}
+const createAxiosInstance = (proxyUrl) => {
+  if (proxyUrl) {
+    const proxyParts = proxyUrl.match(
+      /^http:\/\/([^:]+):([^@]+)@([^:]+):(\d+)$/
+    );
 
-async function getContext() {
-  const chanelId = chanelList[Math.floor(Math.random() * chanelList.length)];
-  const url = `https://discord.com/api/v9/channels/${chanelId}/messages`;
-
-  try {
-    const res = await axios.get(url, { headers });
-    const result = res.data;
-    const resultList = result
-      .filter((context) => {
-        return (
-          !context.content.includes("<") &&
-          !context.content.includes("@") &&
-          !context.content.includes("http") &&
-          !context.content.includes("?")
-        );
-      })
-      .map((context) => context.content);
-
-    return resultList[Math.floor(Math.random() * resultList.length)];
-  } catch (error) {
-    console.error(error);
-    return genContext();
+    if (proxyParts) {
+      return axios.create({
+        httpAgent: new HttpsProxyAgent(proxyUrl),
+        proxy: false,
+      });
+    } else {
+      throw new Error("代理URL格式无效");
+    }
+  } else {
+    return axios.create();
   }
-}
+};
 
 async function chat() {
-  // 账号列表
-  for (const authorization of authorizationList) {
+  for (const [index, account] of accounts.entries()) {
+    // 随机 ua 信息
+    const ua = userAgentData[index % userAgentData.length];
+    const {
+      token: authorization,
+      proxy: proxyUrl,
+      msg: accountMsg,
+      remark,
+    } = account;
+
     const header = {
       ...headers,
+      ...ua,
       Authorization: authorization,
     };
-    // 频道列表
-    for (const chanelId of chanelList) {
+
+    for (const channel of channels) {
+      const { id: channelId, msg: channelMsg } = channel;
+      const msgList = [
+        ...(accountMsg ?? []),
+        ...(channelMsg ?? []),
+        ...(messages ?? []),
+      ];
+      const content = msgList[Math.floor(Math.random() * msgList.length)];
       const msg = {
-        content: await getContext(),
-        nonce: `872123${random.int(0, 1000)}24123133422`,
+        content: content,
+        nonce: `82329451214${random.int(0, 1000)}33232234`,
         tts: false,
       };
 
-      const url = `https://discord.com/api/v9/channels/${chanelId}/messages`;
+      const url = `https://discord.com/api/v9/channels/${channelId}/messages`;
 
       try {
-        const res = await axios.post(url, msg, { headers: header });
-        console.log("发送成功:", msg);
+        const axiosInstance = createAxiosInstance(proxyUrl);
+        const res = await axiosInstance.post(url, msg, {
+          headers: header,
+        });
+        console.log(remark, "发送成功:", content);
       } catch (error) {
-        console.error(error?.response?.status, "失败");
+        console.error(remark, "发送失败:", error?.response?.status);
+      } finally {
+        console.log(
+          `\x1b[42m%s\x1b[0m`,
+          `[${new Date().toLocaleString("zh-CN", {
+            timeZone: "Asia/Shanghai",
+          })}]`
+        );
       }
 
-      // channel delay 30 - 50s
-      await sleep(random.int(30000, 50000));
+      // channel delay 5 - 10s
+      await sleep(random.int(5000, 10000));
     }
 
     // account delay 5 - 10s
@@ -126,8 +103,8 @@ async function chat() {
       console.log("start:", time++, new Date().toLocaleString());
       await chat();
       // 305-310s 再发送下一次消息
-      const sleep = random.int(305000, 310000);
-      await sleep(sleep);
+      // await sleep(random.int(305000, 310000));
+      await sleep(random.int(60000, 65000));
     } catch (error) {
       console.error(error);
     }

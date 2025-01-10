@@ -8,9 +8,9 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
+    "https-proxy-agent": "^7.0.6",
     "random": "^3.0.6"
   },
-  "devDependencies": {},
   "author": "",
   "license": "ISC"
 }
