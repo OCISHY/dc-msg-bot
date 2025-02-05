@@ -1,7 +1,6 @@
 # dc-msg-bot
 
 discord 自动发消息脚本
-推特: https://x.com/xwxboring
 
 ## 启动项目
 
